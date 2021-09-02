@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[DefaultExecutionOrder(0)]
 public class EntryPoint : Singleton<EntryPoint>
 {
     List<IDisposable> Disposables = new List<IDisposable>();
@@ -24,8 +26,10 @@ public class EntryPoint : Singleton<EntryPoint>
         new PhysicsManager();
         new TimeManager();
         new GameManager();
-        new SoundManager();
+        new AudioManager();
         new ParticleManager();
+        // new ScoreManager();
+        new PlayerSettingsManager();
     }
 
     private void OnDisable() {

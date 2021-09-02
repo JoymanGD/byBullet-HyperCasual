@@ -1,23 +1,23 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Enemy : MonoBehaviour
+public abstract class Enemy : VisibleObject
 {
     [SerializeField] protected EnemyData Data;
     public int CurrentHealth { get; private set; }
     public bool Alive { get; private set; } = true;
-    protected Transform Transform;
 
     protected virtual void MonoStart(){}
     
     protected void Start() {
-        Transform = transform;
-
         var physicsManager = ManagersSL.GetService(typeof(PhysicsManager)) as PhysicsManager;
         physicsManager.ToggleRagdoll(gameObject, false);
 
         CurrentHealth = Data.Health;
+
+        OnDisappear += SkipTheEnemy;
 
         MonoStart();
 
@@ -29,7 +29,7 @@ public abstract class Enemy : MonoBehaviour
     public void GetDamage(int _value){
         CurrentHealth -= _value;
 
-        var soundManager = ManagersSL.GetService(typeof(SoundManager)) as SoundManager;
+        var soundManager = ManagersSL.GetService(typeof(AudioManager)) as AudioManager;
         soundManager.PlaySoundWithRandomPitching("Hit");
 
         var particleManager = ManagersSL.GetService(typeof(ParticleManager)) as ParticleManager;
@@ -55,11 +55,10 @@ public abstract class Enemy : MonoBehaviour
         physicsManager.ThrowRagdollRandomly(gameObject);
     }
 
-    private void OnBecameInvisible() {
+    private void SkipTheEnemy() {
         if(Alive){
             var gameManager = ManagersSL.GetService(typeof(GameManager)) as GameManager;
             gameManager.GetDamage(Data.Damage);
-            Debug.Log("DESTROYED");
             Destroy(gameObject);
         }
     }

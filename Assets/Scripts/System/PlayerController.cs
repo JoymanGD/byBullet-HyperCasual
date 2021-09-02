@@ -1,33 +1,32 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoComponentService
 {
-    [SerializeField] Gun Gun;
+    Gun Gun;
     public PlayerControls PlayerControls { get; private set; }
+    public bool ControllingTime = true;
     bool IsMoving = false, WasMoving = false;
-    Vector3 MovingVector;
+    Vector3 MovementVector;
 
-    protected override void Awake(){
-        base.Awake();
+    void Start(){
+        Gun = ComponentsSL.GetService(typeof(Gun)) as Gun;
+        
+        var gameManager = ManagersSL.GetService(typeof(GameManager)) as GameManager;
+        var tapPanelGameObject = GameObjectsSL.GetService("TapPanel");
+        var tapPanelButton = tapPanelGameObject.GetComponent<Button>();
+        tapPanelButton.onClick.AddListener(()=>gameManager.StartTap(false));
         
         PlayerControls = new PlayerControls();
         
-        //Game start
-        PlayerControls.Main.Tap.started += cntxt => {
-            if(!GameManager.GameStarted){
-                var gameManager = ManagersSL.GetService(typeof(GameManager)) as GameManager;
-                gameManager.StartTap(false);
-            }
-        };
-        
-        //Movement2
+        //Move
         PlayerControls.Main.Move.performed += cntxt => {
             if(GameManager.GameStarted){
                 if(Gun.CurrentBullet){
                     var dir2 = cntxt.ReadValue<Vector2>();
-                    MovingVector = new Vector3(dir2.x, 0, dir2.y);
-                    Gun.CurrentBullet.AddMovement(MovingVector);
-                    Gun.CurrentBullet.SetDirection(MovingVector);
+                    MovementVector = new Vector3(dir2.x, 0, dir2.y);
+                    Gun.CurrentBullet.AddMovement(MovementVector);
+                    Gun.CurrentBullet.SetDirection(MovementVector);
                 }
             }
         };
@@ -35,25 +34,27 @@ public class PlayerController : MonoComponentService
         PlayerControls.Main.Move.canceled += cntxt => {
             if(GameManager.GameStarted){
                 if(Gun.CurrentBullet)
-                    MovingVector = Vector3.zero;
+                    ResetMovementVector();
             }
         };
+
+        PlayerControls.Enable();
     }
 
     private void LateUpdate() {
-        ControlTime();
+        if(ControllingTime)
+            ControlTime();
+
     }
 
     void ControlTime(){
-        IsMoving = MovingVector.magnitude > 0;
+        IsMoving = MovementVector.magnitude > 0;
                     
         if(!WasMoving && IsMoving){
             var timeManager = ManagersSL.GetService(typeof(TimeManager)) as TimeManager;
             timeManager.ResetTimeScale();
         }
 
-        // Debug.Log("IsMoving: " + IsMoving + "; Magnitude: " + MovingVector.magnitude + "; WasMoving: " + WasMoving);
-        
         if(WasMoving && !IsMoving){
             var timeManager = ManagersSL.GetService(typeof(TimeManager)) as TimeManager;
             timeManager.DoSlowMotion();
@@ -62,8 +63,12 @@ public class PlayerController : MonoComponentService
         WasMoving = IsMoving;
     }
 
+    public void ResetMovementVector(){
+        MovementVector = Vector3.zero;
+    }
+
     void OnEnable(){
-        PlayerControls.Enable();
+        if(PlayerControls != null) PlayerControls.Enable();
     }
 
     void OnDisable(){

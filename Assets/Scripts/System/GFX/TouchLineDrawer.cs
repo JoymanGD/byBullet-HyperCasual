@@ -20,13 +20,13 @@ public class TouchLineDrawer : MonoBehaviour
 
         var controller = ComponentsSL.GetService(typeof(PlayerController)) as PlayerController;
         
-        controller.PlayerControls.Main.Tap.started += cntxt => {
-            if(GameManager.GameStarted){
-                TouchLineImage.enabled = true;
-                TouchLine.position = Pointer.current.position.ReadValue();
-                TouchLine.sizeDelta = new Vector2(LineWidth, 0);
-            }
-        };
+        // controller.PlayerControls.Main.Tap.started += cntxt => {
+        //     if(GameManager.GameStarted){
+        //         TouchLineImage.enabled = true;
+        //         TouchLine.position = Pointer.current.position.ReadValue();
+        //         TouchLine.sizeDelta = new Vector2(LineWidth, 0);
+        //     }
+        // };
         
         controller.PlayerControls.Main.Position.performed += cntxt => {
             if(TouchLineImage.enabled){
@@ -37,10 +37,10 @@ public class TouchLineDrawer : MonoBehaviour
             }
         };
 
-        controller.PlayerControls.Main.Tap.canceled += cntxt => {
-            if(TouchLineImage.enabled){
-                TouchLineImage.enabled = false;
-            }
-        };
+        // controller.PlayerControls.Main.Tap.canceled += cntxt => {
+        //     if(TouchLineImage.enabled){
+        //         TouchLineImage.enabled = false;
+        //     }
+        // };
     }
 }

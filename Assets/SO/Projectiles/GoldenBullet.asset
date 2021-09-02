@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28f22fef1bf90c5488c0d3d2dab06077, type: 3}
   m_Name: GoldenBullet
   m_EditorClassIdentifier: 
-  StartSpeedModifier: 2
-  StartHealth: 3
-  StartRicochets: 10
+  StartRicochets: 5
+  RicochetSFX: {fileID: 8300000, guid: 5785b66bbff24d549b2c186132b039f8, type: 3}
+  ObstacleSFX: {fileID: 8300000, guid: 0fff8ec786920fb41931798c50ffa2fb, type: 3}

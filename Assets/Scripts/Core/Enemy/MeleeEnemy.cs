@@ -10,6 +10,7 @@ public class MeleeEnemy : Enemy
     {
         Agent = GetComponent<NavMeshAgent>();
         Agent.enabled = false;
+        OnAppear += TurnOn;
     }
 
     public override void Attack()
@@ -29,10 +30,9 @@ public class MeleeEnemy : Enemy
         Agent.enabled = false;
     }
 
-    private void OnBecameVisible() {
+    private void TurnOn() {
         Agent.enabled = true;
         Agent.destination = TransformsSL.GetService("Player").position;
         Agent.speed = Data.Speed;
-        Debug.Log($"'{name}' is Visible to '{Camera.current.name}'");
     }
 }

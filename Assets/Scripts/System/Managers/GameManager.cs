@@ -15,7 +15,7 @@ public class GameManager : ManagerService
         if(!StartTapped){
             StartTapped = true;
             
-            var tapText = GameObjectsSL.GetService("TapText");
+            var tapText = GameObjectsSL.GetService("MenuUI");
             tapText?.SetActive(false);
 
             var pistol = ComponentsSL.GetService(typeof(Gun)) as Gun;
@@ -44,7 +44,6 @@ public class GameManager : ManagerService
         cameraBehaviour.SetTarget(bulletTransform);
 
         GameStarted = true;
-        Debug.Log("Game started");
     }
 
     private void StartTutorial(TimeManager _timeManager)
@@ -58,6 +57,16 @@ public class GameManager : ManagerService
 
     public void GetDamage(int _value, bool _shake = false, bool _sound = false){
         PlayerHealth -= _value;
+
+        var camera = ComponentsSL.GetService(typeof(CameraBehaviour)) as CameraBehaviour;
+        camera.Shake(.7f, .5f);
+
+        var player = ComponentsSL.GetService(typeof(Player)) as Player;
+        var playerData = player.GetData();
+
+        var soundManager = ManagersSL.GetService(typeof(AudioManager)) as AudioManager;
+        soundManager.PlaySoundWithRandomPitching(playerData.DamageGetSFX);
+
         CheckHealth(ref PlayerHealth);
     }
 
@@ -69,6 +78,5 @@ public class GameManager : ManagerService
     }
 
     public void GameOver(){
-        Debug.Log("GameOver");
     }
 }

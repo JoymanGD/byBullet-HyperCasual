@@ -6,14 +6,6 @@
             "id": "a05f8152-29b8-4663-8985-4e99be95dcb6",
             "actions": [
                 {
-                    "name": "Tap",
-                    "type": "Button",
-                    "id": "a95c7c26-86fe-4fda-83b6-7b5d4b49a0ba",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": ""
-                },
-                {
                     "name": "Position",
                     "type": "Value",
                     "id": "5fef888e-798d-4235-b45c-886e4f682a86",
@@ -31,17 +23,6 @@
                 }
             ],
             "bindings": [
-                {
-                    "name": "",
-                    "id": "330c3537-074f-42b9-8e7e-041170fa9063",
-                    "path": "<Pointer>/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Tap",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
                 {
                     "name": "",
                     "id": "f78167fc-31e4-4a5b-a4ee-b2b0c5814c7b",

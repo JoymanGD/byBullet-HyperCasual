@@ -14,9 +14,16 @@ public class ParticleManager : ManagerService
         var particles = Particles[_name];
 
         if(!particles) return;
+        
+        PlayParticles(particles, _position);
+    }
 
-        ParticleSystem particleSystem = GameObject.Instantiate(particles, _position, Quaternion.identity);
-        particleSystem.gameObject.name = "Particles(" + _name + ")";
+    public void PlayParticles(ParticleSystem _particleSystem, Vector3 _position){
+        if(!_particleSystem) throw new System.Exception("Particle system equals null");
+
+        ParticleSystem particleSystem = GameObject.Instantiate(_particleSystem, _position, Quaternion.identity);
+
+        particleSystem.gameObject.name = "Particles(" + _particleSystem.name + ")";
         particleSystem.Play();
 
         GameObject.Destroy(particleSystem.gameObject, particleSystem.main.startLifetime.constant);

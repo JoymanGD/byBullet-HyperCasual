@@ -19,14 +19,6 @@ public class @PlayerControls : IInputActionCollection, IDisposable
             ""id"": ""a05f8152-29b8-4663-8985-4e99be95dcb6"",
             ""actions"": [
                 {
-                    ""name"": ""Tap"",
-                    ""type"": ""Button"",
-                    ""id"": ""a95c7c26-86fe-4fda-83b6-7b5d4b49a0ba"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """"
-                },
-                {
                     ""name"": ""Position"",
                     ""type"": ""Value"",
                     ""id"": ""5fef888e-798d-4235-b45c-886e4f682a86"",
@@ -44,17 +36,6 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 }
             ],
             ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""330c3537-074f-42b9-8e7e-041170fa9063"",
-                    ""path"": ""<Pointer>/press"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Tap"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
                 {
                     ""name"": """",
                     ""id"": ""f78167fc-31e4-4a5b-a4ee-b2b0c5814c7b"",
@@ -139,7 +120,6 @@ public class @PlayerControls : IInputActionCollection, IDisposable
 }");
         // Main
         m_Main = asset.FindActionMap("Main", throwIfNotFound: true);
-        m_Main_Tap = m_Main.FindAction("Tap", throwIfNotFound: true);
         m_Main_Position = m_Main.FindAction("Position", throwIfNotFound: true);
         m_Main_Move = m_Main.FindAction("Move", throwIfNotFound: true);
     }
@@ -191,14 +171,12 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     // Main
     private readonly InputActionMap m_Main;
     private IMainActions m_MainActionsCallbackInterface;
-    private readonly InputAction m_Main_Tap;
     private readonly InputAction m_Main_Position;
     private readonly InputAction m_Main_Move;
     public struct MainActions
     {
         private @PlayerControls m_Wrapper;
         public MainActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Tap => m_Wrapper.m_Main_Tap;
         public InputAction @Position => m_Wrapper.m_Main_Position;
         public InputAction @Move => m_Wrapper.m_Main_Move;
         public InputActionMap Get() { return m_Wrapper.m_Main; }
@@ -210,9 +188,6 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         {
             if (m_Wrapper.m_MainActionsCallbackInterface != null)
             {
-                @Tap.started -= m_Wrapper.m_MainActionsCallbackInterface.OnTap;
-                @Tap.performed -= m_Wrapper.m_MainActionsCallbackInterface.OnTap;
-                @Tap.canceled -= m_Wrapper.m_MainActionsCallbackInterface.OnTap;
                 @Position.started -= m_Wrapper.m_MainActionsCallbackInterface.OnPosition;
                 @Position.performed -= m_Wrapper.m_MainActionsCallbackInterface.OnPosition;
                 @Position.canceled -= m_Wrapper.m_MainActionsCallbackInterface.OnPosition;
@@ -223,9 +198,6 @@ public class @PlayerControls : IInputActionCollection, IDisposable
             m_Wrapper.m_MainActionsCallbackInterface = instance;
             if (instance != null)
             {
-                @Tap.started += instance.OnTap;
-                @Tap.performed += instance.OnTap;
-                @Tap.canceled += instance.OnTap;
                 @Position.started += instance.OnPosition;
                 @Position.performed += instance.OnPosition;
                 @Position.canceled += instance.OnPosition;
@@ -238,7 +210,6 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     public MainActions @Main => new MainActions(this);
     public interface IMainActions
     {
-        void OnTap(InputAction.CallbackContext context);
         void OnPosition(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
     }

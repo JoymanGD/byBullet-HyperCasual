@@ -1,4 +1,6 @@
 using UnityEngine;
+using DG.Tweening;
+using System;
 
 public class ProjectileBehaviour : MonoBehaviour
 {
@@ -9,19 +11,26 @@ public class ProjectileBehaviour : MonoBehaviour
     public int CurrentDamage { get; private set; }
     Transform Transform;
     Rigidbody Rigidbody;
-    Vector3 MovementVector;
+    Vector3 MovementPosition;
+    Camera MainCamera;
+    bool IsReflecting = false;
     const float MovementSensitivity = .4f;
-    const float RotationSensitivity = .4f;
+    const float RotationSensitivity = .2f;
+    const float ReflectLength = 2f;
+    const float ReflectTime = 1f;
+    const float MaxSpeed = 20f;
+    const float StartSpeedModifier = 2f;
 
     private void Start() {
-        Transform = GetComponent<Transform>();
+        Transform = transform;
         Rigidbody = GetComponent<Rigidbody>();
+        MainCamera = Camera.main;
 
-        SetSpeedModifier(Data.StartSpeedModifier);
+        SetSpeedModifier(StartSpeedModifier);
         SetRicochets(Data.StartRicochets);
 
         Direction = Transform.forward;
-        MovementVector = Transform.position;
+        MovementPosition = Transform.position;
     }
 
     public void SetRicochets(int _value)
@@ -37,8 +46,8 @@ public class ProjectileBehaviour : MonoBehaviour
     public void WasteRicochet(Collider _other){
         CurrentRicochets--;
         
-        var soundManager = ManagersSL.GetService(typeof(SoundManager)) as SoundManager;
-        soundManager.PlaySoundWithRandomPitching("MetalHit");
+        var soundManager = ManagersSL.GetService(typeof(AudioManager)) as AudioManager;
+        soundManager.PlaySoundWithRandomPitching(Data.RicochetSFX);
 
         var particleManager = ManagersSL.GetService(typeof(ParticleManager)) as ParticleManager;
         particleManager.PlayParticles("Sparks", _other.ClosestPoint(Transform.position));
@@ -70,23 +79,48 @@ public class ProjectileBehaviour : MonoBehaviour
         var magn = _direction.magnitude;
 
         if(magn > 2f){
-            var cameraTransform = TransformsSL.GetService("MainCamera");
-            var cameraPlane = new Quaternion(0, cameraTransform.rotation.y, 0, 0);
+            var cameraPlane = GetCameraPlane();
             Direction = cameraPlane * _direction;
         }
     }
 
+    Quaternion GetCameraPlane(){        
+        var cameraTransform = TransformsSL.GetService("MainCamera");
+        var cameraPlane = new Quaternion(0, cameraTransform.rotation.y, 0, 0);
+
+        return cameraPlane;
+    }
+
     public void AddMovement(Vector3 _value){
-        MovementVector += _value * Time.deltaTime * CurrentSpeedModifier;
+        MovementPosition += Vector3.ClampMagnitude(_value, MaxSpeed) * Time.deltaTime * CurrentSpeedModifier;
     }
 
     private void Update() {
-        Move();
-        Rotate();
+        if(!IsReflecting){
+            Rotate();
+        }
+
+        if(GameManager.GameStarted)
+            CheckForCollidingBackBound();
+    }
+
+    private void FixedUpdate() {
+        if(!IsReflecting){
+            Move();
+        }
+    }
+
+    private void CheckForCollidingBackBound()
+    {
+        var viewPosition = MainCamera.WorldToViewportPoint(Transform.position);
+
+        if(!IsReflecting && viewPosition.y <= 0){
+            ReflectBackBound();
+        }
     }
 
     private void Move(){
-        Transform.position = Vector3.Lerp(Transform.position, MovementVector, MovementSensitivity);
+        Transform.position = Vector3.Lerp(Transform.position, MovementPosition, MovementSensitivity);
     }
 
     void Rotate(){
@@ -105,7 +139,7 @@ public class ProjectileBehaviour : MonoBehaviour
                 enemy.GetDamage(CurrentDamage);
             }
         }
-        else if(_other.gameObject.layer == 7){ //enemytool
+        else if(_other.gameObject.layer == 7){ //ricochet
             WasteRicochet(_other);
         }
         else if(_other.gameObject.layer == 9){ //finish
@@ -113,18 +147,76 @@ public class ProjectileBehaviour : MonoBehaviour
             finishComponent.FinishGame();
         }
         else if(_other.gameObject.layer == 10){ //obstacle
-
+            var hitPoint = _other.ClosestPoint(Transform.position);
+            
             var gameManager = ManagersSL.GetService(typeof(GameManager)) as GameManager;
             gameManager.GetDamage(1);
 
             var particleManager = ManagersSL.GetService(typeof(ParticleManager)) as ParticleManager;
-            particleManager.PlayParticles("ShotSmoke", _other.ClosestPoint(Transform.position));
+            particleManager.PlayParticles("ShotSmoke", hitPoint);
 
-            var camera = ComponentsSL.GetService(typeof(CameraBehaviour)) as CameraBehaviour;
-            camera.Shake(.5f, .4f);
+            var soundManager = ManagersSL.GetService(typeof(AudioManager)) as AudioManager;
+            soundManager.PlaySoundWithRandomPitching(Data.ObstacleSFX);
 
-            var soundManager = ManagersSL.GetService(typeof(SoundManager)) as SoundManager;
-            soundManager.PlaySoundWithRandomPitching("HitThrough");
+            ReflectObstacle();
         }
+    }
+
+    private void ReflectObstacle()
+    {
+        RaycastHit forwardHit;
+        RaycastHit backHit = new RaycastHit(); //need to initialize because of 'using local var without declaring'
+
+        var projectileLayerMask = 1 << 10;
+
+        var rayDirection = Transform.forward;
+
+        if(Physics.Raycast(Transform.position, rayDirection, out forwardHit, 10, projectileLayerMask) || Physics.Raycast(Transform.position, -rayDirection, out backHit, 100, projectileLayerMask)){
+            var hit = forwardHit;
+            float finalReflectLength = ReflectLength;
+
+            if(!hit.collider){
+                hit = backHit;
+                finalReflectLength *= 2;
+            }
+            
+            Reflect(hit.normal, finalReflectLength);
+        }
+        else{
+            throw new System.Exception("Reflection caused error");
+        }
+    }
+
+    void ReflectBackBound(){
+        Reflect(GetCameraPlane() * Vector3.forward, ReflectLength);
+
+        var particleManager = ManagersSL.GetService(typeof(ParticleManager)) as ParticleManager;
+        particleManager.PlayParticles("ShotSmoke", Transform.position);
+
+        var soundManager = ManagersSL.GetService(typeof(AudioManager)) as AudioManager;
+        soundManager.PlaySoundWithRandomPitching("HitThrough");
+    }
+
+    void Reflect(Vector3 _normal, float _reflectLength, Action _onComplete = null){
+        IsReflecting = true;
+
+        var timeManager = ManagersSL.GetService(typeof(TimeManager)) as TimeManager;
+        timeManager.ResetTimeScale();
+
+        var playerController = ComponentsSL.GetService(typeof(PlayerController)) as PlayerController;
+        playerController.ControllingTime = false;
+
+        var reflectedDirection = Vector3.Reflect(Transform.forward, _normal);
+        var reflectPosition = Transform.position + reflectedDirection * _reflectLength;
+        Transform.rotation = Quaternion.LookRotation(reflectedDirection, Vector3.up);
+
+        Transform.DOMove(reflectPosition, ReflectTime).OnComplete(()=>{
+            playerController.ControllingTime = true;
+            MovementPosition = Transform.position;
+            Direction = reflectedDirection;
+            IsReflecting = false;
+
+            _onComplete?.Invoke();
+        });
     }
 }

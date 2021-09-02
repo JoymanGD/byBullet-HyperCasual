@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+[DefaultExecutionOrder(2)]
 public abstract class MonoService : MonoBehaviour
 {
     protected virtual void Awake() {

@@ -77,6 +77,11 @@ public class GameManager : ManagerService
         }
     }
 
+    public static void QuitGame(){
+        // AudioManager.SaveAudioSettings();
+    }
+
     public void GameOver(){
+        
     }
 }

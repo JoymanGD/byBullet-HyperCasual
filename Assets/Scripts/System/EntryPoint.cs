@@ -12,6 +12,10 @@ public class EntryPoint : Singleton<EntryPoint>
         CreateManagers();
     }
 
+    private void Start() {
+        LateCreateManagers();
+    }
+
     void CreateServiceLocators(){
         Disposables.AddRange(new List<IDisposable>{
             new PlayableDirectorsSL(),
@@ -26,10 +30,13 @@ public class EntryPoint : Singleton<EntryPoint>
         new PhysicsManager();
         new TimeManager();
         new GameManager();
-        new AudioManager();
         new ParticleManager();
         // new ScoreManager();
         new PlayerSettingsManager();
+    }
+
+    void LateCreateManagers(){
+        // new AudioManager();
     }
 
     private void OnDisable() {
@@ -37,5 +44,7 @@ public class EntryPoint : Singleton<EntryPoint>
         {
             disposable.Dispose();
         }
+
+        GameManager.QuitGame();
     }
 }

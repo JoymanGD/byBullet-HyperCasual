@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerController : MonoComponentService
+public class PlayerControllerOld : MonoComponentService
 {
     Gun Gun;
     public PlayerControls PlayerControls { get; private set; }
@@ -13,9 +13,9 @@ public class PlayerController : MonoComponentService
         Gun = ComponentsSL.GetService(typeof(Gun)) as Gun;
         
         var gameManager = ManagersSL.GetService(typeof(GameManager)) as GameManager;
-        var tapPanelGameObject = GameObjectsSL.GetService("TapPanel");
-        var tapPanelButton = tapPanelGameObject.GetComponent<Button>();
-        tapPanelButton.onClick.AddListener(()=>gameManager.StartTap(false));
+        // var tapPanelGameObject = GameObjectsSL.GetService("TapPanel");
+        // var tapPanelButton = tapPanelGameObject.GetComponent<Button>();
+        // tapPanelButton.onClick.AddListener(()=>gameManager.StartTap(false));
         
         PlayerControls = new PlayerControls();
         

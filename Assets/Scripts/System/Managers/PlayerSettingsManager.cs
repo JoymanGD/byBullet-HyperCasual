@@ -15,13 +15,11 @@ public class PlayerSettingsManager : ManagerService
 
     public PlayerSettingsManager(){
         SetupPlayer();
-        SetupSettings();
-        
+        LoadSettings();
     }
 
-    void SetupSettings()
+    void LoadSettings()
     {
-        LoadAudioSettings();
         var settingsButtonObject = GameObject.Find("SettingsBtn");
         var settingsButton = settingsButtonObject.GetComponent<Button>();
         settingsButton.onClick.AddListener(()=> {
@@ -123,35 +121,15 @@ public class PlayerSettingsManager : ManagerService
 
         var settingsBackButtonObject = GameObjectsSL.GetService("SettingsBackButton");
         var settingsBackButton = settingsBackButtonObject.GetComponent<Button>();
-        settingsBackButton.onClick.AddListener(()=> SaveAudioSettings(soundSlider, musicSlider));
+        // settingsBackButton.onClick.AddListener(()=> SaveAudioSettings(soundSlider, musicSlider));
     }
 
     void SubscribeAudioGroups(Slider _soundSlider, Slider _musicSlider)
     {
-        _soundSlider.onValueChanged.AddListener((value)=> AudioManager.SetVolume("Sound", Denormalize(value, AudioManager.MinVolume, AudioManager.MaxVolume)));
-        _musicSlider.onValueChanged.AddListener((value)=> AudioManager.SetVolume("Music", Denormalize(value, AudioManager.MinVolume, AudioManager.MaxVolume)));
-    }
-
-    public void LoadAudioSettings(){
-        if(!PlayerPrefs.HasKey("SoundVolume")){
-            PlayerPrefs.SetFloat("SoundVolume", .7f);
-        }
-        
-        if(!PlayerPrefs.HasKey("MusicVolume")){
-            PlayerPrefs.SetFloat("MusicVolume", .7f);
-        }
-
-        float soundValue = PlayerPrefs.GetFloat("SoundVolume");
-        float musicValue = PlayerPrefs.GetFloat("MusicVolume");
-        
-        AudioManager.SetVolume("Sound", Denormalize(soundValue, AudioManager.MinVolume, AudioManager.MaxVolume));
-        AudioManager.SetVolume("Music", Denormalize(musicValue, AudioManager.MinVolume, AudioManager.MaxVolume));
-    }
-
-    public void SaveAudioSettings(Slider _soundSlider, Slider _musicSlider){
-        PlayerPrefs.SetFloat("SoundVolume", _soundSlider.value);
-    
-        PlayerPrefs.SetFloat("MusicVolume", _musicSlider.value);
+        // _soundSlider.onValueChanged.AddListener((value)=> AudioManager.SetVolume("Sound", value));
+        // _musicSlider.onValueChanged.AddListener((value)=> AudioManager.SetVolume("Music", value));
+        // _soundSlider.onValueChanged.AddListener((value)=> AudioManager.SetVolume("Sound", Denormalize(value, AudioManager.MinVolume, AudioManager.MaxVolume)));
+        // _musicSlider.onValueChanged.AddListener((value)=> AudioManager.SetVolume("Music", Denormalize(value, AudioManager.MinVolume, AudioManager.MaxVolume)));
     }
 
     float Denormalize(float _value, float _min, float _max){

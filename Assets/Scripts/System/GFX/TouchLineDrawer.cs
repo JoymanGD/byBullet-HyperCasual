@@ -18,7 +18,7 @@ public class TouchLineDrawer : MonoBehaviour
         TouchLine = GetComponent<RectTransform>();
         TouchLineImage = GetComponent<Image>();
 
-        var controller = ComponentsSL.GetService(typeof(PlayerController)) as PlayerController;
+        var controller = ComponentsSL.GetService(typeof(PlayerControllerOld)) as PlayerControllerOld;
         
         // controller.PlayerControls.Main.Tap.started += cntxt => {
         //     if(GameManager.GameStarted){

@@ -9,6 +9,7 @@ public class AudioManager : ManagerService
     Dictionary<string, AudioClip> Sounds = new Dictionary<string, AudioClip>();
     Dictionary<string, AudioClip> Musics = new Dictionary<string, AudioClip>();
 
+    static float SoundVolume, MusicVolume;
     static AudioMixer Mixer;
     public static readonly float MaxVolume = 10f, MinVolume = -80f;
     
@@ -19,10 +20,46 @@ public class AudioManager : ManagerService
     public AudioManager(){
         LoadSounds();
         LoadMusics();
+        LoadAudioSettings();
 
         PlayMusic("Casual", true);
     }
 
+    void LoadSounds(){
+        var sounds = Resources.LoadAll<AudioClip>("Audio/Sounds");
+        
+        foreach (var sound in sounds)
+        {
+            Sounds.Add(sound.name, sound);
+        }
+    }
+
+    void LoadMusics(){
+        var musics = Resources.LoadAll<AudioClip>("Audio/Musics");
+        
+        foreach (var music in musics)
+        {
+            Musics.Add(music.name, music);
+        }
+    }
+
+    public void LoadAudioSettings(){
+        if(!PlayerPrefs.HasKey("SoundVolume")){
+            PlayerPrefs.SetFloat("SoundVolume", .7f);
+        }
+        
+        if(!PlayerPrefs.HasKey("MusicVolume")){
+            PlayerPrefs.SetFloat("MusicVolume", .7f);
+        }
+
+        SoundVolume = PlayerPrefs.GetFloat("SoundVolume");
+        MusicVolume = PlayerPrefs.GetFloat("MusicVolume");
+        
+        AudioManager.SetVolume("Sound", SoundVolume);
+        AudioManager.SetVolume("Music", MusicVolume);
+        // AudioManager.SetVolume("Sound", Denormalize(soundValue, AudioManager.MinVolume, AudioManager.MaxVolume));
+        // AudioManager.SetVolume("Music", Denormalize(musicValue, AudioManager.MinVolume, AudioManager.MaxVolume));
+    }
 
     public void PlaySound(AudioClip _clip){
         var audioSource = CreateAudioSource("Sound("+_clip.name+")");
@@ -81,6 +118,12 @@ public class AudioManager : ManagerService
             GameObject.Destroy(_source.gameObject, _clip.length);
     }
 
+    public static void SaveAudioSettings(){
+        PlayerPrefs.SetFloat("SoundVolume", SoundVolume);
+    
+        PlayerPrefs.SetFloat("MusicVolume", MusicVolume);
+    }
+
     public AudioClip GetSound(string _name){
         var sound = Sounds[_name];
 
@@ -103,33 +146,12 @@ public class AudioManager : ManagerService
         return soundObject.AddComponent<AudioSource>();
     }
 
-    void LoadSounds(){
-        var sounds = Resources.LoadAll<AudioClip>("Audio/Sounds");
-        
-        foreach (var sound in sounds)
-        {
-            Sounds.Add(sound.name, sound);
-        }
-    }
-
-    void LoadMusics(){
-        var musics = Resources.LoadAll<AudioClip>("Audio/Musics");
-        
-        foreach (var music in musics)
-        {
-            Musics.Add(music.name, music);
-        }
-    }
-
     public static void SetVolume(string _channel, float _value){
-        float sound, music;
+        Mixer.SetFloat(_channel, Mathf.Log10(_value) * 20);
 
-        Mixer.GetFloat("Sound", out sound);
-        Mixer.GetFloat("Music", out music);
-
-        Mixer.SetFloat(_channel, _value);
-
-        Mixer.GetFloat("Sound", out sound);
-        Mixer.GetFloat("Music", out music);
+        if(_channel == "Sound")
+            SoundVolume = _value;
+        else if(_channel == "Music")
+            MusicVolume = _value;
     }
 }

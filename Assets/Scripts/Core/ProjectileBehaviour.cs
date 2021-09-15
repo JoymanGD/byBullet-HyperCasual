@@ -203,7 +203,7 @@ public class ProjectileBehaviour : MonoBehaviour
         var timeManager = ManagersSL.GetService(typeof(TimeManager)) as TimeManager;
         timeManager.ResetTimeScale();
 
-        var playerController = ComponentsSL.GetService(typeof(PlayerController)) as PlayerController;
+        var playerController = ComponentsSL.GetService(typeof(PlayerControllerOld)) as PlayerControllerOld;
         playerController.ControllingTime = false;
 
         var reflectedDirection = Vector3.Reflect(Transform.forward, _normal);
